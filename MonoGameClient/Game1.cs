@@ -3,10 +3,11 @@ using Microsoft.AspNet.SignalR.Client;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-
+using System.Linq;
 using Sprites;
 using Microsoft.Xna.Framework.Audio;
 using CameraNS;
+using GameData;
 
 namespace MonoGameClient
 {
@@ -99,7 +100,26 @@ namespace MonoGameClient
                         }, new SoundEffect[] { }, GraphicsDevice.Viewport.Bounds.Center.ToVector2(),
                         8, 0, 5.0f);
 
+            proxy.Invoke<PlayerData>("JoinPlayer", new Position {X = GraphicsDevice.Viewport.Bounds.Center.X,
+                Y = GraphicsDevice.Viewport.Bounds.Center.Y })
+                .ContinueWith(
+            (p) =>
+            {
+                if (p.Result == null)
+                {
+                    connectionMessage = "No player Data returned";
+                    
+                }
+                else
+                {
+                    Player player;
+                    player = (Player)Components.FirstOrDefault(pl => pl.GetType() == typeof(Player));
+                    if (player != null)
+                        player.playerData = p.Result;
+                }
+            });
 
+            
         }
 
         /// <summary>
